@@ -29,7 +29,7 @@ public class SubHunter extends Activity {
     boolean hit = false;
     int shotsTaken;
     int distanceFromSub;
-    boolean debugging = true;
+    boolean debugging = false;
     //Объекты для рисования
     private Canvas mCanvas;
     private Bitmap mBitmap;
@@ -100,6 +100,12 @@ public class SubHunter extends Activity {
             mCanvas.drawLine(0,blockSize * i, numberHorizontalPixels - 1, blockSize * i, mPaint);
         }
 
+        //Рисуем квадрат попадания
+        mCanvas.drawRect(horizontalTouched * blockSize,
+                verticalTouched * blockSize,
+                (horizontalTouched * blockSize) + blockSize,
+                (verticalTouched * blockSize) + blockSize, mPaint);
+
         //Рисуем отладочный текст
         mPaint.setTextSize(blockSize * 2);
         mPaint.setColor(Color.argb(255,0,0,255));
@@ -115,7 +121,9 @@ public class SubHunter extends Activity {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         Log.d("Debugging", "In Touch Event");
-        takeShot();
+        if((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_UP) {
+            takeShot(event.getX(),event.getY());
+        }
         return super.onTouchEvent(event);
     }
 
@@ -123,34 +131,72 @@ public class SubHunter extends Activity {
     /**
      * Совершение выстрела
      */
-    void takeShot() {
+    void takeShot(float x, float y) {
         Log.d("Debugging", "In Take Shoot");
-        draw();
+
+        shotsTaken++;
+        horizontalTouched = (int) x / blockSize;
+        verticalTouched   = (int) y / blockSize;
+
+        hit = horizontalTouched == subHorizontalPosition && verticalTouched == subVerticalPosition;
+
+        int horizontalGap = (int) horizontalTouched - subHorizontalPosition;
+        int verticalGap   = (int) verticalTouched   - subVerticalPosition;
+
+        distanceFromSub = (int) Math.sqrt(Math.pow(horizontalGap,2)+ Math.pow(verticalGap,2));
+
+        if(hit) {
+            boom();
+        } else {
+            draw();
+        }
     }
 
     /**
      * Метод отображает "Бум"
      */
     void boom() {
+        //Устанавливаем BitMap на экран
+        gameView.setImageBitmap(mBitmap);
 
+        //Задаём сплошной цвет экрана
+        mCanvas.drawColor(Color.argb(255,255,0,0));
+
+        //Задаём размеры и цвет текста
+        mPaint.setTextSize(blockSize * 10);
+        mPaint.setColor(Color.argb(255,255,255,255));
+
+        //Рисуем текст БУМ!
+        mCanvas.drawText("BOOM!", blockSize * 4, blockSize * 14, mPaint);
+
+        //Задаём размеры второго текста
+        mPaint.setTextSize(blockSize * 2);
+
+        //Рисуем второй текст
+        mCanvas.drawText("Take a shoot to start again!", blockSize * 8, blockSize * 18, mPaint);
+
+        //Начинаем новую игру
+        newGame();
     }
 
     /**
      * Выводит отладочный текст
      */
     void printDebugText() {
-        mPaint.setTextSize(blockSize);
-        mCanvas.drawText("numberHorizontalPixels: " + numberHorizontalPixels, 50, blockSize * 3, mPaint);
-        mCanvas.drawText("numberVerticalPixels: " + numberVerticalPixels, 50, blockSize * 4, mPaint);
-        mCanvas.drawText("blockSize: " + blockSize, 50, blockSize * 5, mPaint);
-        mCanvas.drawText("gridWidth: " + gridWidth, 50, blockSize * 6, mPaint);
-        mCanvas.drawText("gridHeight: " + gridHeight, 50, blockSize * 7, mPaint);
-        mCanvas.drawText("horizontalTouched: " + horizontalTouched, 50, blockSize * 8, mPaint);
-        mCanvas.drawText("verticalTouched: " + verticalTouched, 50, blockSize * 9, mPaint);
-        mCanvas.drawText("subHorizontalPosition: " + subHorizontalPosition, 50, blockSize * 10, mPaint);
-        mCanvas.drawText("subVerticalPosition: " + subVerticalPosition, 50, blockSize * 11, mPaint);
-        mCanvas.drawText("hit: " + hit, 50, blockSize * 12, mPaint);
-        mCanvas.drawText("shotsTaken: " + shotsTaken, 50, blockSize * 13, mPaint);
-        mCanvas.drawText("debugging: " + debugging, 50, blockSize * 14, mPaint);
+        if(debugging) {
+            mPaint.setTextSize(blockSize);
+            mCanvas.drawText("numberHorizontalPixels: " + numberHorizontalPixels, 50, blockSize * 3, mPaint);
+            mCanvas.drawText("numberVerticalPixels: " + numberVerticalPixels, 50, blockSize * 4, mPaint);
+            mCanvas.drawText("blockSize: " + blockSize, 50, blockSize * 5, mPaint);
+            mCanvas.drawText("gridWidth: " + gridWidth, 50, blockSize * 6, mPaint);
+            mCanvas.drawText("gridHeight: " + gridHeight, 50, blockSize * 7, mPaint);
+            mCanvas.drawText("horizontalTouched: " + horizontalTouched, 50, blockSize * 8, mPaint);
+            mCanvas.drawText("verticalTouched: " + verticalTouched, 50, blockSize * 9, mPaint);
+            mCanvas.drawText("subHorizontalPosition: " + subHorizontalPosition, 50, blockSize * 10, mPaint);
+            mCanvas.drawText("subVerticalPosition: " + subVerticalPosition, 50, blockSize * 11, mPaint);
+            mCanvas.drawText("hit: " + hit, 50, blockSize * 12, mPaint);
+            mCanvas.drawText("shotsTaken: " + shotsTaken, 50, blockSize * 13, mPaint);
+            mCanvas.drawText("debugging: " + debugging, 50, blockSize * 14, mPaint);
+        }
     }
 }
