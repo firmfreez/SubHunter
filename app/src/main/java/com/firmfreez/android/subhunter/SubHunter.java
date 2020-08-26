@@ -91,10 +91,14 @@ public class SubHunter extends Activity {
         //Подготовка и рисование линий
         mPaint.setColor(Color.argb(255,0,0,0));
         //Вертикальная линия
-        mCanvas.drawLine(blockSize * 1, 0, blockSize * 1, numberVerticalPixels - 1, mPaint);
-        //Горизонтальная линия
-        mCanvas.drawLine(0,blockSize * 1, numberHorizontalPixels - 1, blockSize * 1, mPaint);
+        for (int i = 0; i < gridWidth; i++) {
+            mCanvas.drawLine(blockSize * i, 0, blockSize * i, numberVerticalPixels - 1, mPaint);
+        }
 
+        //Горизонтальная линия
+        for (int i = 0; i < gridHeight + 1; i++) {
+            mCanvas.drawLine(0,blockSize * i, numberHorizontalPixels - 1, blockSize * i, mPaint);
+        }
 
         //Рисуем отладочный текст
         mPaint.setTextSize(blockSize * 2);
