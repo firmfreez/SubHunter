@@ -1,17 +1,22 @@
 package com.firmfreez.android.subhunter;
 
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
+import android.widget.ImageView;
 
 import java.util.Random;
 
-public class SubHunter extends AppCompatActivity {
+public class SubHunter extends Activity {
+    //Переменные
     int numberHorizontalPixels;
     int numberVerticalPixels;
     int blockSize;
@@ -25,6 +30,11 @@ public class SubHunter extends AppCompatActivity {
     int shotsTaken;
     int distanceFromSub;
     boolean debugging = true;
+    //Объекты для рисования
+    private Canvas mCanvas;
+    private Bitmap mBitmap;
+    private ImageView gameView;
+    private Paint mPaint;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +51,14 @@ public class SubHunter extends AppCompatActivity {
         blockSize              = numberHorizontalPixels / gridWidth;
         gridHeight             = numberVerticalPixels   / blockSize;
 
+        //Init drawing
+        mBitmap = Bitmap.createBitmap(numberHorizontalPixels, numberVerticalPixels, Bitmap.Config.ARGB_8888);
+        mCanvas = new Canvas(mBitmap);
+        gameView = new ImageView(this);
+        mPaint = new Paint();
+
+
+        setContentView(gameView);
 
         Log.d("Debugging", "In Create");
         newGame();
@@ -55,7 +73,7 @@ public class SubHunter extends AppCompatActivity {
         subVerticalPosition = random.nextInt(gridHeight);
         subHorizontalPosition = random.nextInt(gridWidth);
         shotsTaken = 0;
-        
+
         Log.d("Debugging", "In new game");
     }
 
@@ -65,6 +83,24 @@ public class SubHunter extends AppCompatActivity {
      * Экран "БУМ"
      */
     void draw() {
+        gameView.setImageBitmap(mBitmap);
+
+        //Заполняем экран белым цветом
+        mCanvas.drawColor(Color.argb(255,255,255,255));
+
+        //Подготовка и рисование линий
+        mPaint.setColor(Color.argb(255,0,0,0));
+        //Вертикальная линия
+        mCanvas.drawLine(blockSize * 1, 0, blockSize * 1, numberVerticalPixels - 1, mPaint);
+        //Горизонтальная линия
+        mCanvas.drawLine(0,blockSize * 1, numberHorizontalPixels - 1, blockSize * 1, mPaint);
+
+
+        //Рисуем отладочный текст
+        mPaint.setTextSize(blockSize * 2);
+        mPaint.setColor(Color.argb(255,0,0,255));
+        mCanvas.drawText("Shots taken: " + shotsTaken + " Distance: " + distanceFromSub, blockSize, blockSize * 1.75f,mPaint);
+
         Log.d("Debugging", "In Draw");
         printDebugText();
     }
@@ -99,18 +135,18 @@ public class SubHunter extends AppCompatActivity {
      * Выводит отладочный текст
      */
     void printDebugText() {
-        Log.d("numberHorizontalPixels" , "" + numberHorizontalPixels);
-        Log.d("numberVerticalPixels", "" + numberVerticalPixels);
-        Log.d("blockSize", "" + blockSize);
-        Log.d("gridWidth", "" + gridWidth);
-        Log.d("gridHeight", "" + gridHeight);
-        Log.d("horizontalTouched", "" + horizontalTouched);
-        Log.d("verticalTouched", "" + verticalTouched);
-        Log.d("subHorizontalPosition", "" + subHorizontalPosition);
-        Log.d("subVerticalPosition", "" + subVerticalPosition);
-        Log.d("hit", "" + hit);
-        Log.d("shotsTaken", "" + shotsTaken);
-        Log.d("debugging", "" + debugging);
-        Log.d("distanceFromSub", "" + distanceFromSub);
+        mPaint.setTextSize(blockSize);
+        mCanvas.drawText("numberHorizontalPixels: " + numberHorizontalPixels, 50, blockSize * 3, mPaint);
+        mCanvas.drawText("numberVerticalPixels: " + numberVerticalPixels, 50, blockSize * 4, mPaint);
+        mCanvas.drawText("blockSize: " + blockSize, 50, blockSize * 5, mPaint);
+        mCanvas.drawText("gridWidth: " + gridWidth, 50, blockSize * 6, mPaint);
+        mCanvas.drawText("gridHeight: " + gridHeight, 50, blockSize * 7, mPaint);
+        mCanvas.drawText("horizontalTouched: " + horizontalTouched, 50, blockSize * 8, mPaint);
+        mCanvas.drawText("verticalTouched: " + verticalTouched, 50, blockSize * 9, mPaint);
+        mCanvas.drawText("subHorizontalPosition: " + subHorizontalPosition, 50, blockSize * 10, mPaint);
+        mCanvas.drawText("subVerticalPosition: " + subVerticalPosition, 50, blockSize * 11, mPaint);
+        mCanvas.drawText("hit: " + hit, 50, blockSize * 12, mPaint);
+        mCanvas.drawText("shotsTaken: " + shotsTaken, 50, blockSize * 13, mPaint);
+        mCanvas.drawText("debugging: " + debugging, 50, blockSize * 14, mPaint);
     }
 }
